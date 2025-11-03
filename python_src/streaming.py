@@ -25,8 +25,8 @@ class BroadcastController:
         self.stream_position = 0.0
         self.stream_lock = threading.Lock()
         
-        # قائمة الانتظار
-        self.clip_queue = Queue(maxsize=self.config.get("BUFFER_SIZE", 5))
+        # قائمة الانتظار (buffer أصغر لتوفير الذاكرة)
+        self.clip_queue = Queue(maxsize=2)
         
         # حالة Producer/Consumer
         self.producer_running = False
@@ -79,7 +79,8 @@ class BroadcastController:
         """المنتج الذكي - يسجل المقاطع باستخدام Bash"""
         self.producer_running = True
         clip_counter = 0
-        clip_duration = float(self.config.get("CLIP_SECONDS"))
+        # مدة المقطع المحسّنة
+        clip_duration = 17.0
         failures = 0
         
         print("🎬 المنتج الذكي (Bash): بدء العمل")
@@ -116,6 +117,8 @@ class BroadcastController:
                     self.clip_queue.put((output_path, current_position, clip_counter), timeout=5)
                     print(f"✅ #{clip_counter} ({elapsed:.1f}ث) → التالي: {self.stream_position:.1f}ث | Q:{self.clip_queue.qsize()}")
                     failures = 0
+                    # انتظار قصير بعد كل مقطع لتقليل الضغط
+                    time.sleep(1)
                 else:
                     self.stats["clips_failed"] += 1
                     failures += 1
@@ -156,9 +159,12 @@ class BroadcastController:
                     await self._send_clip(clip_path)
                 except Exception as e:
                     print(f"❌ خطأ إرسال #{counter}: {str(e)[:50]}")
+                finally:
+                    # حذف الملف فوراً لتحرير الذاكرة
                     try:
                         if os.path.exists(clip_path):
                             os.remove(clip_path)
+                            print(f"🗑️ تم حذف #{counter}")
                     except:
                         pass
                 
@@ -211,15 +217,10 @@ class BroadcastController:
                 pass
             await asyncio.sleep(0.1)
         
-        # حذف الملف
-        try:
-            if os.path.exists(clip_path):
-                os.remove(clip_path)
-        except:
-            pass
-        
         self.stats["clips_sent"] += 1
         print(f"📊 {success_count}/{len(self.active_users) + 1}")
+        
+        # لا نحذف الملف هنا، سيُحذف في consumer
         return success_count > 0
     
     async def _send_start_message(self):
