@@ -80,7 +80,7 @@ class BroadcastController:
         self.producer_running = True
         clip_counter = 0
         # مدة المقطع المحسّنة
-        clip_duration = 17.0
+        clip_duration = 12.0
         failures = 0
         
         print("🎬 المنتج الذكي (Bash): بدء العمل")
