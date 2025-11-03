@@ -35,10 +35,11 @@ record_clip_with_watermark() {
         -c:v libx264
         -preset veryfast
         -tune zerolatency
-        -crf 24
+        -crf 26
         -g 30
         -keyint_min 30
         -sc_threshold 0
+        -threads 1
         -c:a aac
         -b:a 128k
         -ar 44100
