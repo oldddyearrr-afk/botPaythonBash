@@ -33,9 +33,9 @@ record_clip_with_watermark() {
         -async 1
         -vsync passthrough
         -c:v libx264
-        -preset ultrafast
+        -preset veryfast
         -tune zerolatency
-        -crf 23
+        -crf 24
         -g 30
         -keyint_min 30
         -sc_threshold 0
