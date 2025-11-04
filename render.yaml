@@ -8,6 +8,8 @@ services:
     startCommand: "python run.py"
     healthCheckPath: /health
     autoDeploy: true
+    healthCheckTimeout: 60
+    healthCheckInterval: 30
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
