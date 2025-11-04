@@ -28,6 +28,6 @@ async def start_web_server():
     app.router.add_get('/health', handle_health)
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', 5000)
+    site = web.TCPSite(runner, '0.0.0.0', 5000, reuse_address=True, reuse_port=True)
     await site.start()
-    print("🌐 Web Server: http://0.0.0.0:5000")
+    print(f"🌐 Web Server: http://0.0.0.0:5000")
